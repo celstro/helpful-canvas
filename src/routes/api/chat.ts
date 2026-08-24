@@ -24,7 +24,7 @@ export const Route = createFileRoute("/api/chat")({
         const apiKey = process.env["LOVABLE_API_KEY"];
         if (!apiKey) return new Response("Missing AI configuration", { status: 500 });
 
-        const supabase = getSupabase();
+        const supabase = await getSupabase();
         const gateway = createLovableAiGatewayProvider(apiKey);
 
         const tools = {
