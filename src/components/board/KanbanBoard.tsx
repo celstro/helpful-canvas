@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import {
   STATUSES,
   STATUS_LABEL,
@@ -26,7 +25,12 @@ const COLUMN_ACCENT: Record<Status, string> = {
 
 export function KanbanBoard() {
   const queryClient = useQueryClient();
-  const { data: tasks = [], isLoading } = useQuery({ queryKey: ["tasks"], queryFn: fetchTasks });
+  const { data: tasks = [], isLoading } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: fetchTasks,
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true,
+  });
 
   const [dragging, setDragging] = useState<Task | null>(null);
   const [hoverColumn, setHoverColumn] = useState<Status | null>(null);
@@ -34,20 +38,8 @@ export function KanbanBoard() {
   const [editing, setEditing] = useState<Task | null>(null);
   const [defaultStatus, setDefaultStatus] = useState<Status>("todo");
 
-  useEffect(() => {
-    const channel = supabase
-      .channel("tasks-board")
-      .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => {
-        queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["tasks"] });
+
 
   const create = useMutation({
     mutationFn: (values: TaskInput) =>
