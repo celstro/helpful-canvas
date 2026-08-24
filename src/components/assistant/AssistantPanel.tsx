@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import { DefaultChatTransport, type ToolUIPart, type UIMessage } from "ai";
 import { useQueryClient } from "@tanstack/react-query";
 import { ListChecks, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
@@ -25,7 +25,6 @@ import {
   ToolHeader,
   ToolInput,
   ToolOutput,
-  type ToolPart,
 } from "@/components/ai-elements/tool";
 import { Button } from "@/components/ui/button";
 
