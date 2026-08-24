@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
 import { STATUS_LABEL, fetchTasks } from "@/lib/tasks";
-import { pillForPriority } from "@/components/board/pill";
+import { PRIORITY_TONE } from "@/components/board/pill";
 
 export const Route = createFileRoute("/activity")({
   head: () => ({
@@ -61,7 +61,7 @@ function ActivityPage() {
                     {action} · {STATUS_LABEL[task.status]}
                   </span>
                   <span
-                    className={`ml-auto rounded-full px-2 py-0.5 text-[11px] ${pillForPriority(task.priority)}`}
+                    className={`ml-auto rounded-full px-2 py-0.5 text-[11px] ${PRIORITY_TONE[task.priority]}`}
                   >
                     {task.priority}
                   </span>
