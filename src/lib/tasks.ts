@@ -1,4 +1,9 @@
-import { supabase } from "@/integrations/supabase/client";
+import {
+  createTaskFn,
+  deleteTaskFn,
+  listTasksFn,
+  updateTaskFn,
+} from "@/lib/tasks.functions";
 
 export const STATUSES = ["todo", "inprogress", "done"] as const;
 export type Status = (typeof STATUSES)[number];
@@ -26,11 +31,7 @@ export type Task = {
 };
 
 export async function fetchTasks(): Promise<Task[]> {
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("*")
-    .order("position", { ascending: true });
-  if (error) throw error;
+  const data = await listTasksFn();
   return (data ?? []) as Task[];
 }
 
@@ -44,16 +45,13 @@ export type TaskInput = {
 };
 
 export async function createTask(input: TaskInput & { position?: number }) {
-  const { error } = await supabase.from("tasks").insert(input);
-  if (error) throw error;
+  await createTaskFn({ data: input });
 }
 
 export async function updateTask(id: string, patch: Partial<TaskInput> & { position?: number }) {
-  const { error } = await supabase.from("tasks").update(patch).eq("id", id);
-  if (error) throw error;
+  await updateTaskFn({ data: { id, ...patch } });
 }
 
 export async function deleteTask(id: string) {
-  const { error } = await supabase.from("tasks").delete().eq("id", id);
-  if (error) throw error;
+  await deleteTaskFn({ data: { id } });
 }

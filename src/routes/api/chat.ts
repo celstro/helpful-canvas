@@ -1,26 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
 import { convertToModelMessages, streamText, stepCountIs, tool, type UIMessage } from "ai";
 import { z } from "zod";
+import { compact } from "@/lib/db-payload";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
-function getSupabase() {
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-  const url = process.env["SUPABASE_URL"]!;
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: {
-      fetch: (input: RequestInfo | URL, init?: RequestInit) => {
-        const h = new Headers(init?.headers);
-        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) {
-          h.delete("Authorization");
-        }
-        h.set("apikey", key);
-        return fetch(input, { ...init, headers: h });
-      },
-    },
-  });
+async function getSupabase() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return supabaseAdmin;
 }
+
 
 const statusEnum = z.enum(["todo", "inprogress", "done"]);
 const priorityEnum = z.enum(["low", "medium", "high"]);
@@ -37,7 +25,7 @@ export const Route = createFileRoute("/api/chat")({
         const apiKey = process.env["LOVABLE_API_KEY"];
         if (!apiKey) return new Response("Missing AI configuration", { status: 500 });
 
-        const supabase = getSupabase();
+        const supabase = await getSupabase();
         const gateway = createLovableAiGatewayProvider(apiKey);
 
         const tools = {
@@ -66,7 +54,7 @@ export const Route = createFileRoute("/api/chat")({
             execute: async (input) => {
               const { data, error } = await supabase
                 .from("tasks")
-                .insert({ ...input, position: Date.now() })
+                .insert(compact({ ...input, position: Date.now() }))
                 .select("id,title,status")
                 .single();
               if (error) return { error: error.message };
@@ -87,7 +75,7 @@ export const Route = createFileRoute("/api/chat")({
             execute: async ({ id, ...patch }) => {
               const { data, error } = await supabase
                 .from("tasks")
-                .update(patch)
+                .update(compact(patch))
                 .eq("id", id)
                 .select("id,title,status")
                 .single();
