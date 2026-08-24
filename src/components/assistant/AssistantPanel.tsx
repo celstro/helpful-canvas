@@ -141,16 +141,16 @@ export function AssistantPanel() {
                     if (part.type === "text") {
                       return <MessageResponse key={index}>{part.text}</MessageResponse>;
                     }
-                    if (part.type.startsWith("tool-") || part.type === "dynamic-tool") {
-                      const toolPart = part as ToolPart;
+                    if (part.type.startsWith("tool-")) {
+                      const toolPart = part as ToolUIPart;
                       return (
                         <Tool key={index} defaultOpen={false} className="my-1">
                           <ToolHeader type={toolPart.type} state={toolPart.state} />
                           <ToolContent>
                             <ToolInput input={toolPart.input} />
                             <ToolOutput
-                              output={toolPart.output}
-                              errorText={toolPart.errorText}
+                              output={toolPart.output ?? null}
+                              errorText={toolPart.errorText ?? ""}
                             />
                           </ToolContent>
                         </Tool>
