@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { compact } from "@/lib/db-payload";
 
 const statusEnum = z.enum(["todo", "inprogress", "done"]);
 const priorityEnum = z.enum(["low", "medium", "high"]);
@@ -33,7 +34,7 @@ export const createTaskFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => taskInputSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("tasks").insert(data);
+    const { error } = await supabaseAdmin.from("tasks").insert(compact(data));
     if (error) throw new Error("Could not create task");
     return { ok: true };
   });
@@ -43,7 +44,7 @@ export const updateTaskFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { id, ...patch } = data;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("tasks").update(patch).eq("id", id);
+    const { error } = await supabaseAdmin.from("tasks").update(compact(patch)).eq("id", id);
     if (error) throw new Error("Could not update task");
     return { ok: true };
   });

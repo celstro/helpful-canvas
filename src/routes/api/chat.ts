@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, stepCountIs, tool, type UIMessage } from "ai";
 import { z } from "zod";
+import { compact } from "@/lib/db-payload";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 async function getSupabase() {
@@ -53,7 +54,7 @@ export const Route = createFileRoute("/api/chat")({
             execute: async (input) => {
               const { data, error } = await supabase
                 .from("tasks")
-                .insert({ ...input, position: Date.now() })
+                .insert(compact({ ...input, position: Date.now() }))
                 .select("id,title,status")
                 .single();
               if (error) return { error: error.message };
@@ -74,7 +75,7 @@ export const Route = createFileRoute("/api/chat")({
             execute: async ({ id, ...patch }) => {
               const { data, error } = await supabase
                 .from("tasks")
-                .update(patch)
+                .update(compact(patch))
                 .eq("id", id)
                 .select("id,title,status")
                 .single();
